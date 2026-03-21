@@ -105,6 +105,17 @@ class MDParser(Parser):
                     children=[], metadata=sec_metadata, node_type=NodeType.SECTION
                 )
 
+                # Add heading text as a SENTENCE leaf so it's included in node.content
+                title_metadata = sec_metadata.copy()
+                title_metadata["text"] = title
+                title_node = Node(
+                    children=[],
+                    metadata=title_metadata,
+                    node_type=NodeType.SENTENCE,
+                    content=title,
+                )
+                section_node.add_child(title_node)
+
                 # Add to parent
                 if stack:
                     stack[-1][1].add_child(section_node)
