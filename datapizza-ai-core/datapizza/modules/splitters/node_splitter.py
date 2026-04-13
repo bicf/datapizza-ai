@@ -9,7 +9,7 @@ class NodeSplitter(Splitter):
     level of children that fit within max_chars, continuing deeper into the tree structure as needed.
     """
 
-    def __init__(self, max_char: int = 5000):
+    def __init__(self, max_char: int = 5000, include_title_in_text: bool = True):
         """
         Initialize the NodeSplitter.
 
@@ -17,10 +17,17 @@ class NodeSplitter(Splitter):
             max_char: The maximum number of characters per chunk
         """
         self.max_char = max_char
+        self.include_title_in_text = include_title_in_text
 
     def _node_to_chunks(self, nodes: list[Node]) -> list[Chunk]:
         return [
-            Chunk(id=str(node.id), text=node.content, metadata=node.metadata)
+            Chunk(
+                id=str(node.id),
+                text=f"{node.metadata['title']}\n{node.content}"
+                if self.include_title_in_text and node.metadata.get("title")
+                else node.content,
+                metadata=node.metadata,
+            )
             for node in nodes
             if node.content
         ]
