@@ -39,6 +39,8 @@ class NodeSplitter(Splitter):
         with tracer.start_as_current_span("NodeSplitter.split") as span:
             span.set_attribute("node.id", str(node.id))
             span.set_attribute("node.content_length", len(node.content))
+            span.set_attribute("node.content", str(node.content))
+            span.set_attribute("max_char", self.max_char)
 
             if len(node.content) <= self.max_char:
                 return self._node_to_chunks([node])
