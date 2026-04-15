@@ -1,7 +1,7 @@
 from datapizza.core.modules.splitter import Splitter
 from datapizza.tracing.tracing import tracer
 from datapizza.type.type import Chunk, Node
-
+import json
 
 class NodeSplitter(Splitter):
     """
@@ -39,7 +39,7 @@ class NodeSplitter(Splitter):
         with tracer.start_as_current_span("NodeSplitter.split") as span:
             span.set_attribute("node.id", str(node.id))
             span.set_attribute("node.content_length", len(node.content))
-            span.set_attribute("node.metadata", str(node.metadata))
+            span.set_attribute("node.metadata", node.metadata)
             span.set_attribute("node.content", str(node.content))
             span.set_attribute("max_char", self.max_char)
 
