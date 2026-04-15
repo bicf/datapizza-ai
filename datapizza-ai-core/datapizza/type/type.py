@@ -411,18 +411,22 @@ class Node:
 
     @property
     def content(self) -> str:
+        prefix_parts = [
+            str(self.metadata[idx])
+            for idx in self.metadata_included
+            if idx in self.metadata
+        ]
+
         if self.is_leaf:
-            prefix_parts = [
-                str(self.metadata[idx])
-                for idx in self.metadata_included
-                if idx in self.metadata
-            ]
             base = self._content or ""
             if prefix_parts:
                 return "\n".join(prefix_parts) + "\n" + base if base else "\n".join(prefix_parts)
             return base
 
-        return " ".join([child.content for child in self.children])
+        base = " ".join([child.content for child in self.children])
+        if prefix_parts:
+            return "\n".join(prefix_parts) + "\n" + base if base else "\n".join(prefix_parts)
+        return base
 
     @property
     def is_leaf(self) -> bool:
