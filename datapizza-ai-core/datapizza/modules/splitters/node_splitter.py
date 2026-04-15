@@ -1,7 +1,6 @@
 from datapizza.core.modules.splitter import Splitter
-from datapizza.tracing.tracing import tracer
 from datapizza.type.type import Chunk, Node
-import json
+
 
 class NodeSplitter(Splitter):
     """
@@ -36,26 +35,18 @@ class NodeSplitter(Splitter):
         Returns:
             A list of chunks
         """
-        with tracer.start_as_current_span("NodeSplitter.split") as span:
-            span.set_attribute("node.id", str(node.id))
-            span.set_attribute("node.content_length", len(node.content))
-            span.set_attribute("node.metadata", node.metadata)
-            span.set_attribute("node.content", str(node.content))
-            span.set_attribute("max_char", self.max_char)
+        if len(node.content) <= self.max_char:
+            return self._node_to_chunks([node])
 
-            if len(node.content) <= self.max_char:
-                return self._node_to_chunks([node])
+        result = []
 
-            result = []
+        for child in node.children:
+            result.extend(self.split(node=child))
 
-            for child in node.children:
-                result.extend(self.split(node=child))
+        if not result:
+            return self._node_to_chunks([node])
 
-            if not result:
-                return self._node_to_chunks([node])
-
-            span.set_attribute("chunks.count", len(result))
-            return result
+        return result
 
     def __call__(self, node: Node) -> list[Chunk]:
         return self.split(node)
