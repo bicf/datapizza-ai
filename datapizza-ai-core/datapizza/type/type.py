@@ -392,6 +392,7 @@ class Node:
         metadata: dict | None = None,
         node_type: NodeType = NodeType.SECTION,
         content: str | None = None,
+        metadata_included: list[str] | None = None,
     ):
         """
         Initialize a Node object.
@@ -406,18 +407,26 @@ class Node:
         self.node_type = node_type
         self._content = content
         self.id = uuid.uuid4()
+        self.metadata_included = metadata_included if metadata_included is not None else ["title"]
 
     @property
     def content(self) -> str:
-        """Get the textual content of this node and its children."""
-        if self.is_leaf:
-            if self._content:
-                return self._content
-            # Handle other content types appropriately
-            return ""
+        prefix_parts = [
+            str(self.metadata[idx])
+            for idx in self.metadata_included
+            if idx in self.metadata
+        ]
 
-        # Add space or newline between child contents
-        return " ".join([child.content for child in self.children])
+        if self.is_leaf:
+            base = self._content or ""
+            if prefix_parts:
+                return "\n".join(prefix_parts) + "\n" + base if base else "\n".join(prefix_parts)
+            return base
+
+        base = " ".join([child.content for child in self.children])
+        if prefix_parts:
+            return "\n".join(prefix_parts) + "\n" + base if base else "\n".join(prefix_parts)
+        return base
 
     @property
     def is_leaf(self) -> bool:
